@@ -1,0 +1,4 @@
+EGF -> RAF
+RAF -> MEK
+MEK -> ERK
+ERK -| RAF

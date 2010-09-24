@@ -1,0 +1,189 @@
+% \VignetteIndexEntry{SQUADD package}
+% \VignetteKeyword{logic}
+% \VignetteKeyword{erk}
+
+\documentclass[a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{url}
+\usepackage{Sweave}
+\usepackage{graphicx}
+\usepackage{lscape}
+\usepackage{multirow}
+\usepackage[normal,small,bf]{caption}
+ 
+ \begin{document}
+
+\SweaveOpts{prefix.string = Fig/test, eps = FALSE, pdf = TRUE}
+
+\title{Analysis of ERK dynamics using SQUAD and its add-on SQUADD}
+\author{Martial Sankar}
+\maketitle
+\section{SQUADD: the SQUAD add-on}
+Logical modeling is increasingly popular method in system biology to explain and predict
+the behavior of a complex process (differentiation, cell growth,
+division etc\dots) through their regulatory and signalling mechanisms. The
+SQUAD software (Standardized Qualitative Dynamical Systems) is dedicated to
+the analysis of Boolean logical models \cite{DiCara}. It was
+the first tool to combine the traditional Boolean approach and a continuous system. This novel feature permits the dynamical analysis of regulatory network in the absence of kinetic data (\cite{Sanchez-Corrales}, \cite{Philippi},  \cite{DiCara}). In order to improve this approach, we provide the R package SQUADD, the SQUAD add-on. It is built in respect to S4 classes and the methods convention. This extension 
+permits: (i) to simplify the visualization of the initial SQUAD simulation
+output, (ii) to generate qualitative predictions of the component change between
+two conditions and (iii) to assess the coherence of a network model using PCA
+analysis.
+
+The SQUADD uses are illustrated on the simplified model of the ERK signaling in mammalian cells. The ERK cascade is composed of three major kinase components, RAF MEK and ERK.     
+
+\section{SQUAD Simulation of the ERK cascade}
+
+\begin{enumerate}
+
+
+\item SQUAD software can be downloaded at \url{http://www.enfin.org/wiki/doku.php?id=enfin:squad:start}.
+
+\item Install and open it.
+
+\item Load the network model in SQUAD. You can use the .net file, containing a sample model \textit{sample\_model.net} for the following steps. the file is located in the \textsf{extdata/data\_ERK} directory of the SQUADD package.
+
+\item To visualize the network, click on the \textsf{View} tab.
+
+\item Then \textsf{Advance}, then \textsf{Perturbator}.
+
+\item load the provided pertubation file, \textit{sample.prt}.
+
+\item Click \textsf{Initialize}, then click \textsf{run} to run simulations with perturbations.
+
+\item When the simulation window appears, press \textsf{Ctrl+T} to open the result table and save them (\textsf{Ctrl+S}) into a folder. When naming files,
+\textbf{add an index number in the file name} (i.e. \textit{1\_ERK\_sustained.txt}, \textit{2\_mERK\_sustained.txt} etc\dots). So, this folder should contain two *.txt files, one for each perturbated model simulation.
+
+\end{enumerate}
+
+
+\section{Example of SQUADD analysis}
+\label{sect1}
+<<source package>>=
+library(SQUADD)
+@
+The package was built using S4 classes and methods. Before launching a
+function, the user should call the constructor to construct an instance of the
+Class \textsf{\textit{SquadSimResServiceImpl}}.
+
+The constructor is: \textsf{\textit{simResService()}}. Do not forget to use the 
+\textsf{\textit{help()}} function to obtain R help.
+
+To obtain a table of fitted values, construct the object of Class
+\textsf{\textit{SquadSimResServiceImpl}}:
+
+<<instance, echo=T>>=
+# construct instance of SquadSimResServiceImpl
+fpath <- system.file("extdata", package="SQUADD")
+folder <- file.path(fpath,"data_ERK")
+sim <- simResService (folder=folder,
+			  time= 20,
+			  ncolor=5,
+     		 legend= c("EGF", "ERK", "MEK", "RAF"),
+  			 indexDeno=1,
+			 method="lowess")
+@
+
+\subsection{Display the simulation matrix}
+
+The \textsf{\textit{plotSimMatrix}} method permits to analyse the individual
+node's behavior during each perturbated condition. The shape of the
+response curve reflects the network topologies and the initial SQUAD
+parameters (Figure 1). The user can select the node to analyse by filling the
+\textsf{\textit{selectNode}} attribute of the object.
+
+\begin{figure}
+\begin{center}
+<<label=SimMatrix, fig=TRUE,echo=T,width=10, height=7>>=
+sim["selectNode"] <-c("ERK", "MEK", "RAF")
+plotSimMatrix(sim)
+@
+\end{center}
+\caption{\label{fig:one} Simulation matrix for the selected three nodes, ERK, MEK
+RAF, (respectively in black, red, green). The columns represent the nodes, the rows indicate the conditions. Each cell shows
+the specific response curve for each perturbated condition. The red line is
+the least-square fitted line. It indicates the tendancy of the response.}
+\end{figure}
+
+The Figure 1 explains the dynamic of the ERK system components in two conditions. In the first condition (first row), the system undergo a constant EGF stimulation. The whole system, ERK, MEK and RAF, enter in an oscillatory steady states as showing by the sustained oscillation of their response curve.
+In the second condition (second row), the system is perturbated by a steady inactivation of ERK (t$=$8) simulated an ERK loss of function mutant (black curve). From t$=$8, MEK (red) and RAF (green) show a monotone response curve. This two example of the dynamic of ERK signalling. The reality of the ERK response is much more complex due to the topology of the feedback interactions and due to kinetic parameters impossible to render using the simple Logical formalism. For example, the oscillations can be sustained as shown in Figure 1 or damped. More details can be found in \cite{Birtwistle} and \cite{Nakayama}.
+User can take full advantage of the \textsf{plotSimMatrix} method when having to deal with complex network (cf SQUAD.pdf vignette).  
+ 
+ 
+	
+\newpage
+\subsection{Obtain the matrix of fitted values}
+
+The \textsf{\textit{getFittedTable}} method permits to obtain a matrix of the
+interpolated value of the response curve at a user-defined time point. The
+interpolation can be done either linearly or locally (lowess). Users can choose
+one of them by filling the \textsf{\textit{method}} attribut of an object of
+Class \textsf{\textit{SquadSimResServiceImpl}}. In this example, the
+values were interpolated using the lowess method at t$=$45 (see section
+\ref{sect1}).
+
+<<fittedValues, echo=T>>=
+tab <- getFittedTable(sim)
+@
+
+\subsection{Display the prediction heatmap}
+
+Biological experiments generate more and more quantitative data. However,
+classical logical models are prone to reflect the qualitative nature of a
+system, but fail to predict the outcome of biological experiments that yield to
+quantitative data. SQUAD was the first software to assess this issue. It was
+built around a standardized method \cite{MendozaAndXenarios} that translates a
+ Boolean model into a continuous one.
+ \newline
+The SQUADD package, through the \textsf{\textit{plotPredMap}} method, takes 
+ advantage of this novel feature. It generates a heatmap of predictions of
+the component's activation level changes between two experiments. A ratio is therefore calculated
+between the interpolated values of the current condition (numerator) and a
+reference condition (denominator). The latter is chosen by setting the
+\textsf{\textit{indexDeno}} attribute. In this example we chose
+\textsf{\textit{indexDeno}}$=$1 (see section \ref{sect1}).
+
+<<label=PredMap, echo=T, fig=T, include=FALSE >>=
+plotPredMap(sim)
+@
+
+
+\begin{figure}
+  \begin{center}
+<<label=FigPredMap, echo=FALSE, fig=T, width=6, height=8 >>=
+<<PredMap>>
+@
+	\end{center}
+\caption{\label{fig:two} Prediction heatmap. The rows represent the ratios between
+conditions and the columns represent the network components. The blue intensities (from
+white to dark blue) show the activation patterns (respectively, from
+under-activated to over-activated).}
+\end{figure}
+
+The level of activation of the species can be cross either with the protein expression level or with the gene expression level when studying gene regulatory network. User can easily cross these values whith public available data or he can target the most suitable experiments to confirme or refute the tested hypothesis (qPCR, FRET...).
+
+\newpage
+\section{Session info}
+<<>>=
+sessionInfo()
+@
+
+\section{Perspectives}
+\begin{itemize}
+\item[*] better access to the plot function parameters 
+\item[*] Improve plotCC: Title to define, label of vector to localize 
+\item[*] Improve the simulation matrix: set row names (conditions) and column
+names (selected nodes).
+\end{itemize}
+
+\newpage
+\section{Reference}
+
+\bibliographystyle{plain}
+\bibliography{biblio.bib}
+
+ 
+ \end{document}
+
+
+

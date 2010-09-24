@@ -1,0 +1,29 @@
+export(
+	"simResService"
+)
+exportMethods(
+    "[",
+    "[<-",
+    "getFittedTable",
+    "plotCC",
+    "plotPredMap",
+    "plotSimMatrix" 
+)
+exportClasses(
+    "SquadSimResServiceImpl" 
+)
+
+importClassesFrom(methods, character, numeric, vector)
+
+importFrom(graphics, abline, arrows, axis, legend, par, plot, text)
+
+importFrom(grDevices, palette, pdf)
+
+importFrom(methods, "@<-", new, validObject)
+
+importFrom(RColorBrewer, brewer.pal)
+
+importFrom(stats, heatmap, lm, lowess, prcomp)
+
+importFrom(utils, read.table)
+

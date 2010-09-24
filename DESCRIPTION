@@ -1,0 +1,14 @@
+Package: SQUADD
+Type: Package
+Title: Add-on of the SQUAD Software
+Version: 0.99.0
+Date: 2010-06-14
+Author: Martial Sankar, supervised by Christian Hardtke and Ioannis Xenarios
+Maintainer: Martial Sankar <martial.sankar@unil.ch>
+Description: This package SQUADD is a SQUAD add-on. It permits to generate SQUAD simulation matrix, prediction Heat-Map and Correlation Circle from PCA analysis.   
+License: GPL (>=2)
+LazyLoad: yes
+Depends: R (>= 2.11.0)
+Imports: graphics, grDevices, methods, RColorBrewer, stats, utils
+URL: http://www.unil.ch/dbmv/page21142_en.html, http://www.vital-it.ch/about/
+Collate: SquadSimResService.R SquadSimResServiceImpl.R

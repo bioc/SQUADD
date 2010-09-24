@@ -1,0 +1,232 @@
+% \VignetteIndexEntry{SQUADD package}
+% \VignetteKeyword{logic}
+% \VignetteKeyword{network}
+
+\documentclass[a4paper]{article}
+\usepackage[latin1]{inputenc}
+\usepackage{url}
+\usepackage{Sweave}
+\usepackage{graphicx}
+\usepackage[normal,small,bf]{caption}
+ 
+\begin{document}
+
+\SweaveOpts{prefix.string = Fig/test, eps = FALSE, pdf = TRUE}
+
+\title{SQUAD simulation results analysis using the SQUADD package}
+\author{Martial Sankar}
+\maketitle
+\section{SQUADD: the SQUAD add-on}
+Logical modeling is increasingly popular method in system biology to explain
+and predict the behavior of a complex process (differentiation, cell growth,
+division etc\dots) through their regulatory and signalling mechanisms. The
+SQUAD software (Standardized Qualitative Dynamical Systems) is dedicated to
+the analysis of Boolean logical models \cite{DiCara}. It was
+the first tool to combine the traditional Boolean approach and a continuous
+system. This novel feature permits the dynamical analysis of regulatory
+network in the absence of kinetic data \cite{Sanchez-Corrales}, \cite{Philippi},  \cite{DiCara}. In order to
+improve this approach, we provide the R package SQUADD, the SQUAD add-on. This
+extension permits: (i) to simplify the visualization of the initial SQUAD
+simulation output, (ii) to generate qualitative predictions of the component
+change between two conditions and (iii) to assess the coherence of a network
+model using PCA analysis.
+
+
+\section{Example of SQUAD Simulation}
+
+\begin{enumerate}
+
+\item SQUAD software can be downloaded at
+\url{http://www.enfin.org/wiki/doku.php?id=enfin:squad:start}.
+ 
+\item Install and open it.
+
+\item Create a network model or use the xml file, containing a sample 
+model \textit{complete\_model\_511.xml} for the following steps. Load it in
+SQUAD.
+
+\item To visualize the network, click on the \textsf{View} tab.
+
+\item Then \textsf{Advance}, then \textsf{Perturbator}.
+
+\item Click on \textsf{Edit Perturbator} to set the pertubation on your model or
+load the provided pertubation file, \textit{pert\_samples\_m511.prt} if you use
+the sample model.
+
+\item Click \textsf{Initialize}, then click \textsf{run} to run simulations
+with perturbations.
+
+\item When the simulation window appears, press \textsf{Ctrl+T} to open the
+result table and save it (\textsf{Ctrl+S}) into a folder. When naming files,
+\textbf{add an index number in the file name} (i.e.
+\textit{1\_lof.txt}, \textit{2\_rescue.txt} etc\dots). This folder should
+contain six files, one for each perturbated model simulation (for the sample network, folder and
+files can be found in the zip file, \textit{simRes.zip}, or in the data folder
+of the SQUADD package).
+	
+\end{enumerate}
+
+
+\section{Example of SQUADD analysis}
+\label{sect1}
+<<source package>>=
+library(SQUADD)
+@
+The package was built using S4 classes and methods. Before launching a
+function, the user should call the constructor to construct an instance of the
+Class \textsf{\textit{SquadSimResServiceImpl}}.
+
+The constructor is: \textsf{\textit{simResService()}}. Do not forget to use the 
+\textsf{\textit{help()}} function to obtain R help.
+
+To obtain a table of fitted values, construct the object of Class
+\textsf{\textit{SquadSimResServiceImpl}}:
+
+<<instance, echo=T>>=
+# construct instance of SquadSimResServiceImpl
+fpath <- system.file("extdata", package="SQUADD")
+folder <- file.path(fpath,"data_IAA")
+sim <- simResService (folder=folder,
+			  time= 45,
+			  ncolor=5,
+      		  legend= c("ARF(a)", "ARF(i)", "AR_Genes", "Aux/IAA", 
+      		  "BES1/BZR1","BIN2","BR","BRI1BAK1","BRR_Genes","BRX","BR_Biosynthesis","BZR1","DO","IAA","IAA_Biosynthesis","NGA1", "PIN", "SCFTir1","StimAux", "StimBR"), indexDeno=1,
+			  method="lowess")
+@
+
+\subsection{Display the simulation matrix}
+
+The \textsf{\textit{plotSimMatrix}} method permits to analyse the individual
+node's behavior during each perturbated condition. The shape of the
+response curve reflects the network topologies and the initial SQUAD
+parameters (Figure 1). The user can select the node to analyse by filling the
+\textsf{\textit{selectNode}} attribute of the object.
+
+\begin{figure}
+\begin{center}
+<<label=SimMatrix, fig=TRUE,echo=T,width=10, height=10>>=
+sim["selectNode"] <-c("DO","IAA_Biosynthesis","BR_Biosynthesis", "IAA", "BR")
+plotSimMatrix(sim)
+@
+\end{center}
+\caption{\label{fig:one} Simulation matrix for the selected five nodes, DO, IAA
+Biosynthesis, BR Biosynthesis, IAA and BR (respectively in black, red, green, blue, cyan).
+The columns represent the nodes, the rows represent the conditions. Each cell
+shows the specific response curve for the corresponding conditions. The red
+line is the least-square fitted line. It indicates the tendancy of the response.}
+\end{figure}
+	
+\newpage
+\subsection{Obtain the matrix of fitted values}
+
+The \textsf{\textit{getFittedTable}} method permits to obtain a matrix of the
+interpolated value of the response curve at a user-defined time point. The
+interpolation can be done either linearly or locally (lowess). Users can choose
+one of them by filling the \textsf{\textit{method}} attribut of an object of
+Class \textsf{\textit{SquadSimResServiceImpl}}. In this example, the
+values were interpolated using the lowess method at t$=$45 (see section
+\ref{sect1}).
+
+<<fittedValues, echo=T>>=
+tab <- getFittedTable(sim)
+@
+
+\subsection{Display the prediction heatmap}
+
+Biological experiments generate more and more quantitative data. However,
+classical logical models are prone to reflect the qualitative nature of a
+system, but fail to predict the outcome of biological experiments that yield
+quantitative data. SQUAD was the first software to assess this issue. It was
+built around a standardized method \cite{MendozaAndXenarios} that translate a
+ Boolean model into a continuous one.
+ \newline
+ The SQUADD package through the \textsf{\textit{plotPredMap}} method takes 
+full advantage of this novel feature. It generates a heatmap of predictions of
+the component's activation state change between two experiments. A ratio is
+therefore calculated between the interpolated values of the current condition (numerator) and a
+reference condition (denominator). The latter is chosen by setting the
+\textsf{\textit{indexDeno}} attribut. In this example we chose
+\textsf{\textit{indexDeno}}$=$1 (see section \ref{sect1}), which
+corresponds to the index of the first result file \textit{brx\_1\_normal.txt}
+(Figure 2).
+
+<<label=PredMap, echo=T, fig=T, width=8, height=10, include=FALSE >>=
+plotPredMap(sim)
+@
+
+
+\begin{figure}
+  \begin{center}
+<<label=FigPredMap, echo=FALSE, fig=T, width=10, height=10 >>=
+<<PredMap>>
+@
+	\end{center}
+\caption{\label{fig:two} Prediction heatmap. The rows represent the ratios
+between conditions, the columns represent the network components. The blue
+intensities (from white to dark blue) show the activation patterns (respectively, from
+under-activated to over-activated).}
+\end{figure}
+
+\newpage
+
+\subsection{Display the correlation circle}
+We suggest to use a principal component analysis (PCA) to assess the coherance
+of the prediction supplied by one model. PCA can be visualized as a correlation
+circle, which can be displayed by applying the \textsf{\textit{plotCC}} method
+of the Class \textsf{\textit{SquadSimResServiceImpl}} (Figure 3).\newline
+
+<<label=CorrelationCircle, echo=T, fig=T,width=8, height=8,include=FALSE >>=
+# Fill the field conditionList of the object sim 
+sim["conditionList"] <- c("Normal", "brxlof", "BRrescue","brxarfilof","brxarfiBRrescue", "brxgof") 
+plotCC(sim)
+@
+
+\begin{figure}
+ \begin{center}
+<<label=figCorrCircle, echo=F, fig=T,width=8, height=8>>=
+<<CorrelationCircle>>
+@
+\end{center}
+\caption{\label{fig:three} Correlation circle. The vectors represent the
+variables. The variables correspond to the perturbated conditions (Normal
+(wildtype), brxlof (brx loss of function), BRrescue (BR rescue the brx loss of
+function phenotype ), brxarfilof (double loss of function mutant brx arfi),
+brxarfiRescue (BR rescue the double mutant phenotype), brxgain (BRX gain of
+function)). The first two PCs explained 80.3\% of the variation. The angle
+between the vectors indicate the correlation between the variables. The closer
+two vectors are, the better the correlation is. In this figure, the angle
+between the wild type condition and the the BRX loss of function conditions
+(brxlof and brxarfilof) are very close meaning that the correlation exists
+between the two variables. This is contradictory with biological findings
+, where loss of function mutants display shorter root \cite{Scacchi}.
+Moreover, the angle between the normal and the rescue conditions is more than 90 degrees, meaning
+no correlation. These results demonstrate that the model coherence is weak,
+meaning that the model still needs to be refined (change interaction sign,
+remove or add nodes etc\ldots).}
+\end{figure}
+
+
+
+
+\newpage
+\section{Session info}
+<<>>=
+sessionInfo()
+@
+
+\section{Perspectives}
+\begin{itemize}
+\item[*] better access to the plot function parameters 
+\item[*] Improve plotCC: Title to define, label of vector to localize 
+\item[*] Improve the simulation matrix: set row names (conditions) and column
+names (selected nodes).
+\end{itemize}
+
+\newpage
+\section{Reference}
+
+\bibliographystyle{plain}
+\bibliography{biblio.bib}
+ 
+ \end{document}
+

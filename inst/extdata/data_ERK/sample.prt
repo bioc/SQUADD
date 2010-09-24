@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol level="1.0">
+  <perturbations>
+    <perturbation id="ERK-sustained" initialstate="State1">
+      <constantpulse parameter="state" target="EGF" time="0.0" value="1.0" />
+    </perturbation>
+    <perturbation id="ERK*-sustained" initialstate="State1">
+      <constantpulse parameter="state" target="ERK" time="8.0" value="0.0" />
+      <constantpulse parameter="state" target="EGF" time="0.0" value="1.0" />
+    </perturbation>
+    <perturbation id="ERKg-sustained" initialstate="State1">
+      <constantpulse parameter="state" target="EGF" time="0.0" value="1.0" />
+      <constantpulse parameter="state" target="ERK" time="8.0" value="1.0" />
+    </perturbation>
+  </perturbations>
+  <states>
+    <state id="State1">
+      <activenode id="EGF" state="0.0" />
+      <activenode id="ERK" state="0.0" />
+    </state>
+  </states>
+</protocol>
+
