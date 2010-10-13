@@ -180,7 +180,7 @@ names (selected nodes).
 \section{Reference}
 
 \bibliographystyle{plain}
-\bibliography{biblio.bib}
+\bibliography{biblio}
 
  
  \end{document}
