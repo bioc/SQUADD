@@ -10,5 +10,6 @@ License: GPL (>=2)
 LazyLoad: yes
 Depends: R (>= 2.11.0)
 Imports: graphics, grDevices, methods, RColorBrewer, stats, utils
-URL: http://www.unil.ch/dbmv/page21142_en.html, http://www.vital-it.ch/about/
+URL: http://www.unil.ch/dbmv/page21142_en.html
 Collate: SquadSimResService.R SquadSimResServiceImpl.R
+biocViews: GraphsAndNetworks, DataRepresentation
