@@ -19,7 +19,7 @@ importFrom(graphics, abline, arrows, axis, legend, par, plot, text)
 
 importFrom(grDevices, palette, pdf)
 
-importFrom(methods, "@<-", new, validObject)
+importFrom(methods, new, validObject)
 
 importFrom(RColorBrewer, brewer.pal)
 
