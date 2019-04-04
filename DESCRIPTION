@@ -5,7 +5,7 @@ Version: 1.33.0
 Date: 2012-04-27
 Author: Martial Sankar, supervised by Christian Hardtke and Ioannis
         Xenarios
-Maintainer: Martial Sankar <martial.sankar@unil.ch>
+Maintainer: Martial Sankar <martial.sankar@sib.swiss>
 Description: This package SQUADD is a SQUAD add-on. It permits to
         generate SQUAD simulation matrix, prediction Heat-Map and
         Correlation Circle from PCA analysis.

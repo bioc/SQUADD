@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{SQUADD package}
+% \VignetteIndexEntry{SQUADD HOW-TO}
 % \VignetteKeyword{logic}
 % \VignetteKeyword{network}
 

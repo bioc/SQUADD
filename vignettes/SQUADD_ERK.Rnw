@@ -1,4 +1,4 @@
-% \VignetteIndexEntry{SQUADD package}
+% \VignetteIndexEntry{SQUADD ERK exemple}
 % \VignetteKeyword{logic}
 % \VignetteKeyword{erk}
 
